@@ -17,7 +17,7 @@ orcs <- list(metadata = compadre$metadata[orc_ind, ],
 
 orc_names <- orcs$metadata$SpeciesAccepted
 
-# Bien is a beast. Seriously
+# Bien is a beast. Seriously, it's a beast
 
 # vignette("BIEN")
 
