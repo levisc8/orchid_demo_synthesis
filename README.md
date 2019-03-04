@@ -24,6 +24,12 @@ Dependencies for the project thus far:
 
 8.  `ggtree`
 
+9.  `maps`
+
+10. `popbio`
+
+11. `popdemo`
+
 If you don't already have these, `install.packages()` them and then run each script!
 
 ### Note on ggtree

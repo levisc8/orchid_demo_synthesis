@@ -21,12 +21,12 @@ qsdConvergence <- function(survMatrix, beginLife){
   eig = eigen.analysis(survMatrix)
   qsd = eig$stable.stage
   qsd = as.numeric(t(matrix(qsd / sum(qsd))))
-  
+
   #Set up a cohort
   nzero = rep(0, uDim[1]) #Set a population vector of zeros
   nzero[beginLife] = 1 #Set the first stage to =1
   n = nzero #Rename for convenience
-  
+
   #Iterate the cohort (n= cohort population vector, p = proportional structure)
   dist = p = NULL
   survMatrix1 <- survMatrix
@@ -40,7 +40,7 @@ qsdConvergence <- function(survMatrix, beginLife){
       pick2 = min(which(dist < 0.05))
       pick3 = min(which(dist < 0.01))
       convage = c(pick1, pick2, pick3)
-    return(convage) 
+    return(convage)
 }
 
 
@@ -50,7 +50,7 @@ lifeTimeRepEvents <- function(matU, matF, startLife = 1){
     surv = colSums(matU)
     repLifeStages = colSums(matF)
     repLifeStages[which(repLifeStages>0)] = 1
-    
+
   if(missing(matF) | missing(matU)){stop('matU or matF missing')}
   if(sum(matF,na.rm=T)==0){stop('matF contains only 0 values')}
 
@@ -85,7 +85,7 @@ lifeTimeRepEvents <- function(matU, matF, startLife = 1){
     pRep = Bprime[2,startLife]
 
     out$pRep = pRep
-    
+
     #Age at first reproduction (La; Caswell 2001, p 124)
     D = diag(c(Bprime[2,]))
     Uprimecond = D%*%Uprime%*%ginv(D)
@@ -111,9 +111,9 @@ lifeTimeRepEvents <- function(matU, matF, startLife = 1){
 
 #Function to create a life table
 makeLifeTable<-function(matU, matF = NULL, matC = NULL, startLife = 1, nSteps = 1000){
-  
+
     matDim = ncol(matU)
-    
+
     #Age-specific survivorship (lx) (See top function on page 120 in Caswell 2001):
       matUtemp = matU
       survivorship = array(NA, dim = c(nSteps, matDim))
@@ -121,15 +121,15 @@ makeLifeTable<-function(matU, matF = NULL, matC = NULL, startLife = 1, nSteps = 
         survivorship[o, ] = colSums(matUtemp %*% matU)
         matUtemp = matUtemp %*% matU
       }
-      
+
       lx = survivorship[, startLife]
       lx = c(1, lx[1:(length(lx) - 1)])
 
     #Make room for dx and qx under assumption of 0.5 in age gap distributions
-    
+
     #Start to assemble output object
     out = data.frame(x = 0:(length(lx)-1),lx = lx)
-    
+
     if(!missing(matF)){
       if(sum(matF,na.rm=T)==0){
         warning("matF contains only 0 values")
@@ -143,12 +143,12 @@ makeLifeTable<-function(matU, matF = NULL, matC = NULL, startLife = 1, nSteps = 
       fertMatrix = matF %*% matUtemp2 * (as.numeric((ginv(diag(t(e) %*% matUtemp2)))))
       ageFertility[q, ] = colSums(fertMatrix)
       matUtemp2 = matUtemp2 %*% matU
-    }  
+    }
     mx = ageFertility[, startLife]
     mx = c(0, mx[1:(length(mx) - 1)])
     out$mx = mx
     }
-    
+
     if(!missing(matC)){
        if(sum(matC,na.rm=T)==0){
         warning("matC contains only 0 values")
@@ -162,30 +162,30 @@ makeLifeTable<-function(matU, matF = NULL, matC = NULL, startLife = 1, nSteps = 
       clonMatrix = matC %*% matUtemp2 * (as.numeric((ginv(diag(t(e) %*% matUtemp2)))))
       ageClonality[q, ] = colSums(clonMatrix)
       matUtemp2 = matUtemp2 %*% matU
-    }  
+    }
     cx = ageClonality[, startLife]
     cx = c(0, cx[1:(length(cx) - 1)])
     out$cx = cx
     }
-    
+
     return(out)
   }
 
 #Function to calculate summary vital rates (not stage-dependent)
 vitalRate <- function(matU, matF, matC=NULL){
-  
+
   matA=matU+matF+matC
   matDim=dim(matA)[1]
-  
+
   out = data.frame("SurvivalSSD"=NA,"ProgressionSSD"=NA,"RetrogressionSSD"=NA,"ReproductionSSD"=NA,"ClonalitySSD"=NA)
-  
+
   #Extracting SSD corrected vital rate values
   SSD=eigen.analysis(matA)$stable.stage
   f=colSums(matF)
   out$ReproductionSSD=mean(f*SSD)
   c=colSums(matC)
   out$ClonalitySSD=mean(c*SSD)
-  
+
   #Preparing survival-independent matrix to calculate individual growth rates
   uDistrib=matrix(NA,ncol=matDim,nrow=matDim)
   u=colSums(matU)
@@ -198,7 +198,7 @@ vitalRate <- function(matU, matF, matC=NULL){
   CPrime=colSums(matC)
   CPrime[is.na(CPrime)]=0
   UCPrime=UPrime+CPrime
-  
+
   #Extracting proxy to individual progressive growth rate
   UCPrimeGrowth=UCPrime
   UCPrimeGrowth[upper.tri(UCPrime, diag = T)]=NA
@@ -209,39 +209,39 @@ vitalRate <- function(matU, matF, matC=NULL){
   UCPrimeShrinkage[lower.tri(UCPrime, diag = T)]=NA
   out$RetrogressionSSD=mean(colSums(UCPrimeShrinkage,na.rm=T)*SSD)
 
-  return(out)  
+  return(out)
 }
-  
+
 
 #Function to calculate stage-dependent summary vital rates (pre-rep and reproductive)
 vitalRateStage <- function(matU, matF, matC=NULL){
-  
+
   matA=matU+matF+matC
   matDim=dim(matA)[1]
-  
+
   #Determining prereproductive and reproductive stages
   firstRep=min(which(colSums(matF)>0))
   if (firstRep==1) {preRep=0} else {preRep=1:(firstRep-1)}
   rep=firstRep:matDim
-  
+
   out = data.frame("SurvivalSSDPreRep"=NA,"ProgressionSSDPreRep"=NA,"RetrogressionSSDPreRep"=NA,"ClonalitySSDPreRep"=NA,
                    "SurvivalSSDRep"=NA,"ProgressionSSDRep"=NA,"RetrogressionSSDRep"=NA,"ReproductionSSDRep"=NA,"ClonalitySSDRep"=NA)
-  
+
   #Extracting SSD corrected vital rate values
   SSD=eigen.analysis(matA)$stable.stage
   f=colSums(matF)
   out$ReproductionSSDRep=mean(f[rep]*SSD[rep])
-  
+
   c=colSums(matC)
   out$ClonalitySSDPreRep=mean(c[preRep]*SSD[preRep])
   out$ClonalitySSDRep=mean(c[rep]*SSD[rep])
-  
+
   #Preparing survival-independent matrix to calculate individual growth rates
   uDistrib=matrix(NA,ncol=matDim,nrow=matDim)
   u=colSums(matU)
   out$SurvivalSSDPreRep=mean(u[preRep]*SSD[preRep])
   out$SurvivalSSDRep=mean(u[rep]*SSD[rep])
-  
+
   #Making matrix for transitions conditional on survival
   for (j in which(u>0)) uDistrib[,j]=matU[,j]/u[j]
   UPrime=uDistrib
@@ -249,28 +249,28 @@ vitalRateStage <- function(matU, matF, matC=NULL){
   CPrime=colSums(matC)
   CPrime[is.na(CPrime)]=0
   UCPrime=UPrime+CPrime
-  
+
   #Extracting proxy to individual progressive growth rate
   UCPrimeGrowth=UCPrime
   UCPrimeGrowth[upper.tri(UCPrime, diag = T)]=NA
   UCPrimeGrowth[matDim,matDim]=UCPrime[matDim,matDim]  #Putting back the last element of stasis bc there is likely growth on the top of class
   out$ProgressionSSDPreRep=mean(colSums(UCPrimeGrowth,na.rm=T)[preRep]*SSD[preRep])
   out$ProgressionSSDRep=mean(colSums(UCPrimeGrowth,na.rm=T)[rep]*SSD[rep])
-  
+
   #Extracting proxy to individual retrogressive growth rate
   UCPrimeShrinkage=UCPrime
   UCPrimeShrinkage[lower.tri(UCPrime, diag = T)]=NA
   out$RetrogressionSSDPreRep=mean(colSums(UCPrimeShrinkage,na.rm=T)[preRep]*SSD[preRep])
   out$RetrogressionSSDRep=mean(colSums(UCPrimeShrinkage,na.rm=T)[rep]*SSD[rep])
-  
-  return(out)  
+
+  return(out)
 }
 
 
 
 #Function to calculate vital rate level sensitivities and elasticities
   vitalRatePerturbation <- function(matU, matF, matC=NULL,pert=0.001){
-    
+
     matA=matU+matF+matC
     aDim=dim(matA)[1]
     fakeA=matA
@@ -305,7 +305,7 @@ vitalRateStage <- function(matU, matF, matC=NULL){
       u=colSums(matU)
       for (j in which(u>0)) uIndep[,j]=matA[,j]/u[j]
       sensSigmaA=uIndep*sensA
-        
+
     #Little fix for semelparous species
       uPrime=u
     #uPrime[u==0]=0.001
@@ -348,25 +348,25 @@ vitalRateStage <- function(matU, matF, matC=NULL){
     out$EReproduction=sum(EfDistrib*propF,na.rm=T)
     out$EClonality=sum(EcDistrib*propC,na.rm=T)
 
-   return(out) 
+   return(out)
   }
 
-  
+
   #Function to calculate vital rate level sensitivities and elasticities as a function of pre-reproductive or reproductive (including post-reproductive) stages
   vitalRatePerturbationStage <- function(matU, matF, matC=NULL, pert=0.001){
-    
+
     matA=matU+matF+matC
     aDim=dim(matA)[1]
-    
+
     #Determining prereproductive and reproductive stages
     firstRep=min(which(colSums(matF)>0))
     if (firstRep==1) {preRep=0} else {preRep=1:(firstRep-1)}
     rep=firstRep:aDim
-    
+
     fakeA=matA
     sensA=elasA=matrix(NA,aDim,aDim)
     lambda=Re(eigen(matA)$values[1])
-    
+
     propU=matU/matA
     propU[is.nan(propU)]=0
     propProg=propRetrog=propU
@@ -377,7 +377,7 @@ vitalRateStage <- function(matU, matF, matC=NULL){
     propF[is.nan(propF)]=0
     propC=matC/matA
     propC[is.nan(propC)]=0
-    
+
     #for (i in 1:aDim){
     #  for (j in 1:aDim){
     #     fakeA=matA
@@ -387,21 +387,21 @@ vitalRateStage <- function(matU, matF, matC=NULL){
     #  }
     #}
     #sensA=Re(sensA)
-    
+
     sensA=eigen.analysis(matA,zero=F)$sensitivities
-    
+
     #Survival-independent A matrix
     uIndep=matrix(NA,aDim,aDim)
     u=colSums(matU)
     for (j in which(u>0)) uIndep[,j]=matA[,j]/u[j]
     sensSigmaA=uIndep*sensA
-    
+
     #Little fix for semelparous species
     uPrime=u
     #uPrime[u==0]=0.001
     elasSigmaA=t(t(sensSigmaA)*uPrime)/lambda
     elasA=sensA*matA/lambda
-    
+
     #Extracting survival vital rate
     uDistrib=matrix(0,ncol=aDim,nrow=aDim)
     for (j in which(u>0)) uDistrib[,j]=matU[,j]/u[j]
@@ -413,61 +413,57 @@ vitalRateStage <- function(matU, matF, matC=NULL){
     c=colSums(matC)
     cDistrib=matrix(0,ncol=aDim,nrow=aDim)
     for (j in which(c>0)) cDistrib[,j]=matC[,j]/c[j]
-    
+
     SuDistrib=sensA*uDistrib
     SfDistrib=sensA*fDistrib
     ScDistrib=sensA*cDistrib
-    
+
     out = data.frame("SSurvivalPreRep"=NA,"SGrowthPreRep"=NA,"SShrinkagePreRep"=NA,"SClonalityPreRep"=NA,
                      "SSurvivalRep"=NA,"SGrowthRep"=NA,"SShrinkageRep"=NA,"SReproductionRep"=NA,"SClonalityRep"=NA,
                      "ESurvivalPreRep"=NA,"EGrowthPreRep"=NA,"EShrinkagePreRep"=NA,"EClonalityPreRep"=NA,
                      "ESurvivalRep"=NA,"EGrowthRep"=NA,"EShrinkageRep"=NA,"EReproductionRep"=NA,"EClonalityRep"=NA)
-    
+
     out$SSurvivalPreRep=sum(sensSigmaA[,preRep],na.rm=T)
     out$SGrowthPreRep=sum((sensA*uDistrib*propProg)[,preRep],na.rm=T)
     out$SShrinkagePreRep=sum((sensA*uDistrib*propRetrog)[,preRep],na.rm=T)
     out$SClonalityPreRep=sum((sensA*cDistrib*propC)[,preRep],na.rm=T)
-    
+
     out$SSurvivalRep=sum(sensSigmaA[,rep],na.rm=T)
     out$SGrowthRep=sum((sensA*uDistrib*propProg)[,rep],na.rm=T)
     out$SShrinkageRep=sum((sensA*uDistrib*propRetrog)[,rep],na.rm=T)
     out$SReproductionRep=sum((sensA*fDistrib*propF)[,rep],na.rm=T)
     out$SClonalityRep=sum((sensA*cDistrib*propC)[,rep],na.rm=T)
-    
+
     EuDistrib=sensA*uDistrib*matrix(u,nrow=aDim,ncol=aDim,byrow=T)/lambda
     EfDistrib=sensA*fDistrib*matrix(f,nrow=aDim,ncol=aDim,byrow=T)/lambda
     EcDistrib=sensA*cDistrib*matrix(c,nrow=aDim,ncol=aDim,byrow=T)/lambda
-    
+
     out$ESurvivalPreRep=sum(elasSigmaA[,preRep],na.rm=T)
     out$EGrowthPreRep=sum((elasA*uDistrib*propProg)[,preRep],na.rm=T)
     out$EShrinkagePreRep=sum((elasA*uDistrib*propRetrog)[,preRep],na.rm=T)
     out$EClonalityPreRep=sum((elasA*cDistrib*propC)[,preRep],na.rm=T)
-    
+
     out$ESurvivalRep=sum(elasSigmaA[,rep],na.rm=T)
     out$EGrowthRep=sum((EuDistrib*propProg)[,rep],na.rm=T)
     out$EShrinkageRep=sum((EuDistrib*propRetrog)[,rep],na.rm=T)
     out$EReproductionRep=sum((EfDistrib*propF)[,rep],na.rm=T)
     out$EClonalityRep=sum((EcDistrib*propC)[,rep],na.rm=T)
-    
-    return(out) 
+
+    return(out)
   }
-  
-  
-      
+
+
+
 # #Upload COMPADRE and COMADRE
 
 #Upload COMPADRE and COMADRE
-load("C:/cloud/Dropbox/sAPROPOS project/DemogData/COMPADRE_v.X.X.X.2.RData")
 
-#Take subsets for species with GPS info
-indexCOMPADRE <- which(compadre$metadata$Family=='Orchidaceae')
-compadre$metadata=compadre$metadata[indexCOMPADRE,]
-compadre$mat$matA=compadre$mat$matA[[indexCOMPADRE]]
-compadre$mat$matU=compadre$mat$matU[[indexCOMPADRE]]
-compadre$mat$matF=compadre$mat$matF[[indexCOMPADRE]]
-compadre$mat$matC=compadre$mat$matC[[indexCOMPADRE]]
-compadre$matrixClass=compadre$matrixClass[indexCOMPADRE]
-compadre$metadata[,c("Lat","Lon")]
+source('R/subset_orchids.R')
+
+orchids$metadata$unique_id <- paste(orchids$metadata$SpeciesAccepted,
+                                    orchids$metadata$Journal,
+                                    orchids$metadata$PublicationYear,
+                                    orchids$metadata$MatrixDimension)
 
 
 ###Loop to obtain demographic quantities
@@ -484,7 +480,7 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                   "Continent"=rep(NA,long),
                   "Ecoregion"=rep(NA,long),
                   "MatrixDimension"=rep(NA,long),
-                  
+
                   "Population"=rep(NA,long),
                   "StartYear"=rep(NA,long),
                   "StartMonth"=rep(NA,long),
@@ -496,7 +492,7 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                   "MatrixComposite"=rep(NA,long),
                   "Lat"=rep(NA,long),
                   "Lon"=rep(NA,long),
-                  
+
                   "GenT"=rep(NA,long),
                   "H"=rep(NA,long),
                   "Lmean"=rep(NA,long),
@@ -505,24 +501,24 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                   "La"=rep(NA,long),
                   "La.mean"=rep(NA,long),
                   "La.omega"=rep(NA,long),
-                  
+
                   "SurvSSD"=rep(NA,long),
                   "GrowSSD"=rep(NA,long),
                   "ShriSSD"=rep(NA,long),
                   "RepSSD"=rep(NA,long),
                   "CloSSD"=rep(NA,long),
-                  
+
                   "SurvSSDPreRep"=rep(NA,long),
                   "GrowSSDPreRep"=rep(NA,long),
                   "ShriSSDPreRep"=rep(NA,long),
                   "CloSSDPreRep"=rep(NA,long),
-                  
+
                   "SurvSSDRep"=rep(NA,long),
                   "GrowSSDRep"=rep(NA,long),
                   "ShriSSDRep"=rep(NA,long),
                   "RepSSDRep"=rep(NA,long),
                   "CloSSDRep"=rep(NA,long),
-                  
+
                   "Esurv"=rep(NA,long),
                   "Egrow"=rep(NA,long),
                   "Eshri"=rep(NA,long),
@@ -533,7 +529,7 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                   "Sshri"=rep(NA,long),
                   "Srep"=rep(NA,long),
                   "Sclo"=rep(NA,long),
-                  
+
                   "EsurvPreRep"=rep(NA,long),
                   "EgrowPreRep"=rep(NA,long),
                   "EshriPreRep"=rep(NA,long),
@@ -542,7 +538,7 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                   "SgrowPreRep"=rep(NA,long),
                   "SshriPreRep"=rep(NA,long),
                   "ScloPreRep"=rep(NA,long),
-                  
+
                   "EsurvRep"=rep(NA,long),
                   "EgrowRep"=rep(NA,long),
                   "EshriRep"=rep(NA,long),
@@ -553,7 +549,7 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                   "SshriRep"=rep(NA,long),
                   "SrepRep"=rep(NA,long),
                   "ScloRep"=rep(NA,long),
-                  
+
                   "Lambda"=rep(NA,long),
                   "LambdaAway"=rep(NA,long),
                   "Rho"=rep(NA,long),
@@ -573,9 +569,9 @@ count=0
 #for (i in 1:long){
 for (i in 1:100){ long
   tryCatch({
-  
+
   count=count+1
-  
+
   output[i,c("SpeciesAuthor","SpeciesAccepted","Family","Class","Kingdom","Authors","Journal","YearPublication","Country","Continent","Ecoregion","Lat","Lon","StartYear","StartSeason","StartMonth","EndYear","EndSeason","EndMonth","Population","Treatment","MatrixComposite")]=
     unlist(lapply(d$metadata[count,c("SpeciesAuthor","SpeciesAccepted","Family","Class","Kingdom","Authors","Journal","YearPublication","Country","Continent","Ecoregion","Lat","Lon","MatrixStartYear","MatrixStartSeason","MatrixStartMonth","MatrixEndYear","MatrixEndSeason","MatrixEndMonth","MatrixPopulation","MatrixTreatment","MatrixComposite")],as.character))
 
@@ -588,7 +584,7 @@ for (i in 1:100){ long
     matA=matU+matF+matC
 
     output$MatrixDimension[i]=matDim=dim(matU)[1]
-    
+
     output[i,c("Lmean","Lmax","pRep","La","La.mean","La.omega")]=lifeTimeRepEvents(matU,matF,notProp)
 
     QSD=qsdConvergence(matU,notProp)
@@ -618,7 +614,7 @@ for (i in 1:100){ long
     exp(r*c(1:length(lxmx)))%*%(lxmx)
     output[i,"S"]=abs(sum(lxmx*loglxmx)/sum(lxmx))} else
     {output[i,"S"]==NA}
-    
+
     #Net reproductive rate (R0; Caswell 2001, p 126)
     N=solve(diag(dim(matU)[1]) - matU)
     R=(matF+matC)%*%N
@@ -627,10 +623,10 @@ for (i in 1:100){ long
     if (R0==-Inf | R0==Inf | sum(matF,matC)==0) {output$R0[i]=NA}
 
     #Generation time (T; Caswell 2001, p 129)
-    
+
     output$GenT[i]=GenT=abs(log(R0)/log(Lambda))
     if (GenT==-Inf | GenT==Inf | sum(matF,matC)==0) {output$GenT[i]=NA}
-    
+
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
 
