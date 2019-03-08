@@ -11,9 +11,9 @@ orchids_unmanipulated <- list(metadata    = orchids$metadata[cntr_i, ],
 means_i <- c(which(orchids_unmanipulated$metadata$MatrixComposite == "Mean"),
              which(orchids_unmanipulated$metadata$MatrixComposite == "Pooled"))
 
-orchids_mean_pooled <- list(metadata = orchids_unmanipulated$metadata[mean_i, ],
-                            matrixClass = orchids_unmanipulated$matrixClass[mean_i],
-                            mat = orchids_unmanipulated$mat[mean_i])
+orchids_mean_pooled <- list(metadata = orchids_unmanipulated$metadata[means_i,],
+                            matrixClass = orchids_unmanipulated$matrixClass[means_i],
+                            mat = orchids_unmanipulated$mat[means_i])
 
 # Selecting only matrices that are means of multiple populations
 orchids_mean_pooled$metadata[orchids_mean_pooled$metadata$MatrixPopulation %>% grep(";",.),]$MatrixPopulation
