@@ -27,7 +27,7 @@ saveRDS(orchids_mean_pooled,
 mean_spp <- orchids_mean_pooled %>%
               .$metadata %>%
               .$SpeciesAuthor %>%
-              .[sub_ind_mean_pooled] %>%
+              .[means_i] %>%
               unique
 
 all_spp <- orchids_unmanipulated %>%
