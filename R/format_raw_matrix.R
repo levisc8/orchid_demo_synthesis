@@ -8,14 +8,15 @@ library(tidyr)
 # 4. get matrixClass
 # 5. output a compadre-like object
 
-# species name
+# prove species name (SpeciesAuthor)
 spp_nam <- 'Astragalus_scaphoides_6'
 
-# raw matrix
-raw_mat <- read_xlsx('C:/Users/ac22qawo/Desktop/Astragalus_scaphoides_6.xlsx',
+# raw matrix (these excel files should be in "Data" somewhere)
+raw_mat <- read_xlsx('C:/Users/ac22qawo/Desktop/Astragalus_scaphoides_6_cia.xlsx',
                      sheet='MatrixStacked')
-raw_spp <- read_xlsx('C:/Users/ac22qawo/Desktop/Astragalus_scaphoides_6.xlsx',
+raw_spp <- read_xlsx('C:/Users/ac22qawo/Desktop/Astragalus_scaphoides_6_cia.xlsx',
                      sheet='SpeciesDescriptors')
+
 
 # get rows of separate matrices ---------------------------------
 
@@ -24,11 +25,16 @@ first_row <- setdiff( c(1:nrow(raw_mat)),
                         which(raw_mat$EnteredBy == 'NA') )
 
 # matrix dimension
-mat_dim   <- (first_row[2]-1)
+if( is.na(first_row[2]) ){ 
+  # if we only have 1 matrix
+  mat_dim <- nrow(raw_mat)
+}else{
+  mat_dim   <- (first_row[2]-1)
+} 
 
 # indices raws associated w/ separate matrices
 mat_r_ids  <- lapply(first_row, function(x, add_rows) x:(x+add_rows),
-                    mat_dim-1)
+                     mat_dim-1)
 
 
 # get matrices matA, matU, matF, matC -------------------------------
