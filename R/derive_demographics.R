@@ -1,8 +1,8 @@
 # This script/function is intended to derive a bunch of demographic outputs from populations in COMPADRE and COMADRE w GPS coordinates
 # Authors: Rob Salguero-Gomez
-# Last modified: 7 Oct 2017
+# Last modified: 11 March 2019 by Sam Levin
 
-rm(list=ls(all=TRUE))
+# rm(list=ls())
 
 
 library(maps)
@@ -569,6 +569,10 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                      "KreissTotal"=rep(NA,long))
 
 count <- 0
+
+# sink(file = "Logs/derive_demo_log.txt")
+# sink(file = "Logs/derive_demo_log.txt", type = 'message')
+
 #for (i in 1:long){
 for (i in 1:100){
 
@@ -704,7 +708,26 @@ for (i in 1:100){
     }
   })
 
+  rm(Lambda, r,
+     lx,
+     mx,
+     lifeTable,
+     QSD,
+     matDim,
+     matA,
+     matC,
+     matU,
+     matF,
+     lifeStages,
+     notProp,
+     GenT, R0, N,
+     limGo, loglxmx, lxmx)
+
 }
+
+# sink()
+# sink(type = 'message')
+# close(file = 'Logs/derive_demo_log.txt')
 
 write.csv(output,
           file = 'Data/Csv/orchid_demog_output.csv',
