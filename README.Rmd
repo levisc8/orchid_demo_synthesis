@@ -32,6 +32,12 @@ Dependencies for the project thus far:
 
 11. `popdemo`
 
+12. `purrr`
+
+13. `rlang`
+
+14. `readxl`
+
 If you don't already have these, `install.packages()` them and then run each script!
 
 ### Note on ggtree
