@@ -483,6 +483,7 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                      "Continent"=rep(NA,long),
                      "Ecoregion"=rep(NA,long),
                      "MatrixDimension"=rep(NA,long),
+                     "GrowthForm" = rep(NA, long),
 
                      "Population"=rep(NA,long),
                      "StartYear"=rep(NA,long),
@@ -601,7 +602,8 @@ for (i in 1:100){
     "EndMonth",
     "Population",
     "Treatment",
-    "MatrixComposite"
+    "MatrixComposite",
+    'GrowthForm'
   )] <-
     unlist(lapply(d$metadata[count, c(
       "SpeciesAuthor",
@@ -625,7 +627,8 @@ for (i in 1:100){
       "MatrixEndMonth",
       "MatrixPopulation",
       "MatrixTreatment",
-      "MatrixComposite"
+      "MatrixComposite",
+      'OrganismType'
     )], as.character))
 
   #The calculations here employed define the beginning of life when an individual become established. Thus, we do not consider transitions from the "prop" stages
@@ -737,6 +740,19 @@ write.csv(output,
 #           row.names=F)
 
 
-output$GenT %>% log %>% hist
-output$R0 %>% log %>% hist
+summary(as.factor(output$GrowthForm))
+
+output$GrowthForm[is.na(output$GrowthForm)] <- "Herbaceous perennial"
+
+library(ggplot2)
+
+ggplot(output, aes(x = log(GenT))) +
+  geom_freqpoly(aes(color = GrowthForm), size = 2) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank())
+
+ggplot(output, aes(x = R0)) +
+  geom_freqpoly(aes(color = GrowthForm), size = 2) +
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank())
 
