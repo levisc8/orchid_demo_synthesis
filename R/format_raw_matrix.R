@@ -14,7 +14,7 @@ library(rlang)
 
 # prove species name (SpeciesAuthor)
 
-files <- dir_ls('stash', glob = '*.xlsx')
+files <- dir_ls('./Data/Serialized/Compadre/', glob = '*.xlsx')
 
 source('R/subset_orchids.R')
 
@@ -216,11 +216,11 @@ for(i in seq_along(all_mats)) {
 
 stopifnot(sum(test) == dim(metadata)[1])
 
-out <- list(metadata = metadata,
+orchids <- list(metadata = metadata,
             matrixClass = all_mat_class,
             mat = all_mats)
 
-saveRDS(out,
+saveRDS(orchids,
         'Data/Serialized/Compadre/compadre_plus_new_studies.rds')
 
 
