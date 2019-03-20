@@ -1,6 +1,6 @@
 # Demographic data cleaning/processing script
 
-compadre <- readRDS('Data/Serialized/Compadre/compadre_plus_new_studies.rds')
+compadre <- readRDS('Data/Serialized/Compadre/Compadre_unrel_v4.rds')
 
 sub_ind <- which(compadre$metadata$Family == 'Orchidaceae')
 

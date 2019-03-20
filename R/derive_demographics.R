@@ -5,15 +5,6 @@
 # rm(list=ls())
 
 
-library(maps)
-library(scales)
-library(MASS)
-library(popbio)
-library(popdemo)
-library(Matrix)
-library(dplyr)
-
-
 ###Functions
 
 #Function to trim down lx and mx at a given percentage before stationary convergence
@@ -459,12 +450,22 @@ vitalRatePerturbationStage <- function(matU, matF, matC=NULL, pert=0.001){
 
 #Upload COMPADRE and COMADRE
 
-source('R/subset_orchids.R')
+orchids <- readRDS('Data/Serialized/Compadre/compadre_plus_new_studies.rds')
 
-orchids$metadata$unique_id <- paste(orchids$metadata$SpeciesAccepted,
-                                    orchids$metadata$Journal,
-                                    orchids$metadata$PublicationYear,
-                                    orchids$metadata$MatrixDimension)
+single_ind <- as.integer(c(1, 2, 5, 9, 13, 17, 21, 22,
+                           23, 24, 25, 26, 27, 31, 38,
+                           42, 46, 47, 64, 70, 76, 104,
+                           110, 116, 121, 149, 150, 151,
+                           158, 159, 164, 167, 168, 169,
+                           171, 173, 181, 182, 183, 184,
+                           185, 186, 187, 188, 196, 239,
+                           243, 246, 247, 248, 251, 252,
+                           253, 254, 255, 256, 257, 258,
+                           259, 260))
+
+orchids <- list(metadata    = orchids$metadata[single_ind,],
+                matrixClass = orchids$matrixClass[single_ind],
+                mat         = orchids$mat[single_ind])
 
 d <- orchids
 long <- nrow(d$metadata)
@@ -569,16 +570,12 @@ output <- data.frame("SpeciesAuthor"=rep(NA,long),
                      "KreissLow"=rep(NA,long),
                      "KreissTotal"=rep(NA,long))
 
-count <- 0
 
 # sink(file = "Logs/derive_demo_log.txt")
 # sink(file = "Logs/derive_demo_log.txt", type = 'message')
 
 #for (i in 1:long){
-for (i in 1:100){
-
-
-  count <- count+1
+for (i in 1:dim(d$metadata)[1]){
 
   output[i, c(
     "SpeciesAuthor",
@@ -605,7 +602,7 @@ for (i in 1:100){
     "MatrixComposite",
     'GrowthForm'
   )] <-
-    unlist(lapply(d$metadata[count, c(
+    unlist(lapply(d$metadata[i, c(
       "SpeciesAuthor",
       "SpeciesAccepted",
       "Family",
@@ -632,11 +629,11 @@ for (i in 1:100){
     )], as.character))
 
   #The calculations here employed define the beginning of life when an individual become established. Thus, we do not consider transitions from the "prop" stages
-  lifeStages <- d$matrixClass[[count]][1]
+  lifeStages <- d$matrixClass[[i]][1]
   notProp <- min(which(lifeStages != "prop"))
-  matU <- d$mat[[count]]$matU
-  matF <- d$mat[[count]]$matF
-  matC <- d$mat[[count]]$matC
+  matU <- d$mat[[i]]$matU
+  matF <- d$mat[[i]]$matF
+  matC <- d$mat[[i]]$matC
   matA <- matU+matF+matC
 
   output$MatrixDimension[i]=matDim=dim(matU)[1]
@@ -751,7 +748,7 @@ ggplot(output, aes(x = log(GenT))) +
   theme(panel.background = element_blank(),
         panel.grid = element_blank())
 
-ggplot(output, aes(x = R0)) +
+ggplot(output[45:60, ], aes(x = R0)) +
   geom_freqpoly(aes(color = GrowthForm), size = 2) +
   theme(panel.background = element_blank(),
         panel.grid = element_blank())
