@@ -1,9 +1,3 @@
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(fs)
-library(purrr)
-library(rlang)
 
 # 1. get rows of separate matrices
 # 2. get matrices matA, matU, matF, matC
@@ -14,9 +8,9 @@ library(rlang)
 
 # prove species name (SpeciesAuthor)
 
-files <- dir_ls('./Data/Serialized/Compadre/', glob = '*.xlsx')
+files <- dir_ls(glue::glue("{data_path}/"), glob = '*.xlsx')
 
-source('R/subset_orchids.R')
+# source('R/subset_orchids.R') Only run this if you don't use the pipeline
 
 metadata <- orchids$metadata %>%
   map_if(~is.factor(.x), ~as.character(.x)) %>%
@@ -76,18 +70,12 @@ for(i in files) {
     # precise
     setNames( c('matA', 'matU', 'matF', 'matC') )
 
-  # get matrices
-  get_mats <- function(rows_ids, mat_c_ids, raw_mat){
-
-    list( matA = raw_mat[rows_ids,mat_c_ids$matA],
-          matU = raw_mat[rows_ids,mat_c_ids$matU],
-          matF = raw_mat[rows_ids,mat_c_ids$matF],
-          matC = raw_mat[rows_ids,mat_c_ids$matC] )
-
-  }
 
   # matrices in a list
-  mat_list <- lapply(mat_r_ids, get_mats, mat_c_ids, raw_mat)
+  mat_list <- lapply(mat_r_ids, function(x) get_mats(row_ids = x,
+                                                     mat_c_ids = mat_c_ids,
+                                                     raw_mat = raw_mat,
+                                                     mat_dim = mat_dim))
 
   # get metadata -----------------------------------------------------
 
@@ -216,11 +204,11 @@ for(i in seq_along(all_mats)) {
 
 stopifnot(sum(test) == dim(metadata)[1])
 
-orchids <- list(metadata = metadata,
+out <- list(metadata = metadata,
             matrixClass = all_mat_class,
             mat = all_mats)
 
-saveRDS(orchids,
+saveRDS(out,
         'Data/Serialized/Compadre/compadre_plus_new_studies.rds')
 
 
