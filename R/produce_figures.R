@@ -4,7 +4,7 @@
 ### correcting some types ###
 #############################
 
-output <- read.csv('Data/Csv/orchid_demog_output_78.csv')
+# output <- read.csv('Data/Csv/orchid_demog_output.csv')
 output$YearPublication <- as.integer(output$YearPublication)
 output$StartYear <- as.integer(output$StartYear)
 output$StartSeason <- as.integer(output$StartSeason)
@@ -130,3 +130,13 @@ R0dismean <- ggplot(mu,
   theme(panel.background = element_blank())+
   xlim(0, 13)+
   ylim(0, 1.1)
+
+#### Boxplot ####
+
+boxR0 <- ggplot(mu,
+                aes(fill = GrowthForm)) +
+  geom_boxplot(aes(y = sp.mean.R0))+
+  labs(x = "GrowthForm", y = "R0") +
+  theme(axis.ticks.x=element_blank(),
+        axis.line = element_line(color="black", size = 1)
+  )
