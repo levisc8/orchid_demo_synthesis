@@ -27,6 +27,8 @@ it <- 1
 n_start <- length(all_mats)
 
 for(i in files) {
+
+  print(i)
   # raw matrix (these excel files should be in "Data" somewhere)
   raw_mat <- read_xlsx(i,
                        sheet='MatrixStacked')
@@ -38,12 +40,12 @@ for(i in files) {
   # get indices of first row
   first_row <- setdiff( c(1:nrow(raw_mat)),
                         which(raw_mat$EnteredBy == 'NA' |
-                                grepl('end|End', raw_mat$EnteredBy)) )
+                              grepl('end|End|END', raw_mat$EnteredBy)) )
 
   # matrix dimension
   if( is.na(first_row[2]) ){
     # if we only have 1 matrix
-    mat_dim <- nrow(raw_mat)
+    mat_dim <- nrow(raw_mat)-1
   }else{
     mat_dim   <- (first_row[2]-1)
   }
