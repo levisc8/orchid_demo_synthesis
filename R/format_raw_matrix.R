@@ -89,6 +89,9 @@ for(i in files) {
                 raw_mat %>% names)
   miss_nam <- setdiff(cmp_nams, raw_nams)
 
+  if("NumberPopulations" %in% miss_nam)
+    raw_spp <- mutate(raw_spp, NumberPopulations = NA_integer_)
+
   # first line of metadata for matrices and species
   meta_m_id<- which((raw_mat %>% names) %in% cmp_nams)
   meta_s_id<- which((raw_spp %>% names) %in% cmp_nams)
@@ -117,8 +120,8 @@ for(i in files) {
   # Aldo's data are formatted a bit differently. I think this should work for
   # either setup
 
-  if(any(grepl('end|End', meta_df$SpeciesAuthor))) {
-    meta_df <- meta_df[!grepl('end|End', meta_df$SpeciesAuthor), ]
+  if(any(grepl('end|End|END', meta_df$SpeciesAuthor))) {
+    meta_df <- meta_df[!grepl('end|End|END', meta_df$SpeciesAuthor), ]
   }
 
   if(is.numeric(meta_df$AnnualPeriodicity)) {
@@ -179,10 +182,10 @@ for(i in files) {
   # and the length. Otherwise, you'd end up with a mismatch between dim(metadata)[1]
   # and length(al_mats)/length(all_mat_class)
 
-  all_mats[n_start:(n_start + length(mat_list))] <- dots_splice(!!! mat_list,
-                                                                .homonyms = 'keep')
-  all_mat_class[n_start:(n_start + length(mat_list))] <- dots_splice(!!! mat_class_l,
-                                                                     .homonyms = 'keep')
+  all_mats[(n_start + 1):(n_start + length(mat_list))] <- dots_splice(!!! mat_list,
+                                                                      .homonyms = 'keep')
+  all_mat_class[(n_start + 1):(n_start + length(mat_list))] <- dots_splice(!!! mat_class_l,
+                                                                           .homonyms = 'keep')
 
   n_start <- length(all_mats)
 }
