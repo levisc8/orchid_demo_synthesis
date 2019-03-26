@@ -36,6 +36,12 @@ Dependencies for the project thus far:
 
 14. `readxl`
 
+15. `glue`
+
+16. `MASS`
+
+17. `Matrix`
+
 If you don't already have these, `install.packages()` them and then run each script!
 
 ### Note on ggtree
