@@ -459,7 +459,8 @@ vitalRatePerturbationStage <- function(matU, matF, matC=NULL, pert=0.001){
 
 #Upload COMPADRE and COMADRE
 
-source('R/subset_orchids.R')
+# source('R/subset_orchids.R') # only use if you don't run the pipeline
+orchids <- readRDS('Data/Serialized/Compadre/compadre_plus_new_studies.rds')
 
 orchids$metadata$unique_id <- paste(orchids$metadata$SpeciesAccepted,
                                     orchids$metadata$Journal,
@@ -574,8 +575,8 @@ count <- 0
 # sink(file = "Logs/derive_demo_log.txt")
 # sink(file = "Logs/derive_demo_log.txt", type = 'message')
 
-#for (i in 1:long){
-for (i in 1:100){
+for (i in 1:long){
+# for (i in 1:100){
 
 
   count <- count+1
@@ -739,20 +740,4 @@ write.csv(output,
 # write.csv(output,"C:/cloud/Dropbox/sApropos/mentees/intern/demog_orchids.csv",
 #           row.names=F)
 
-
-summary(as.factor(output$GrowthForm))
-
-output$GrowthForm[is.na(output$GrowthForm)] <- "Herbaceous perennial"
-
-library(ggplot2)
-
-ggplot(output, aes(x = log(GenT))) +
-  geom_freqpoly(aes(color = GrowthForm), size = 2) +
-  theme(panel.background = element_blank(),
-        panel.grid = element_blank())
-
-ggplot(output, aes(x = R0)) +
-  geom_freqpoly(aes(color = GrowthForm), size = 2) +
-  theme(panel.background = element_blank(),
-        panel.grid = element_blank())
 

@@ -56,7 +56,7 @@ source_w_path <- function(script_path, raw_data_path) {
 
   eval_env$data_path <- raw_data_path
 
-  source('R/format_raw_matrix.R', local = eval_env)
+  source(script_path, local = eval_env)
 
   out_list <- rlang::env_get_list(env = eval_env,
                                   nms = rlang::env_names(eval_env))
