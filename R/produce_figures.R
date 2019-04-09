@@ -206,9 +206,9 @@ a <- data.frame(sub(" .*", "", output$SpeciesAccepted), output$GrowthForm, outpu
 names(a) <- c("Genus", "GrowthForm", "R0", "GenT", "Lambda")
 a <- a[which( a$Genus %in% our_fuzz_tree$tip.label ),]
 
-facet_plot(fuzz_our_orchids, panel = "R0", data = a, geom = geom_point, mapping = aes(x= R0))
-facet_plot(fuzz_our_orchids, panel = "GenT", data = a, geom = geom_point, mapping = aes(x= GenT))
-facet_plot(fuzz_our_orchids, panel = "Lambda", data = a, geom = geom_point, mapping = aes(x= Lambda))
+# facet_plot(fuzz_our_orchids, panel = "R0", data = a, geom = geom_point, mapping = aes(x= R0))
+# facet_plot(fuzz_our_orchids, panel = "GenT", data = a, geom = geom_point, mapping = aes(x= GenT))
+# facet_plot(fuzz_our_orchids, panel = "Lambda", data = a, geom = geom_point, mapping = aes(x= Lambda))
 
 d=data.frame(y=1:8, .panel='Lambda')
 e=data.frame(y=1:8, .panel= "GenT")
